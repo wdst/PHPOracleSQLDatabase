@@ -22,7 +22,7 @@ class SQLDatabase {
     }
 
     // OCI Database Instance
-    private static $instance = false;
+    public static $instance = false;
 
     /*
      * Returns instance of OCI Database , creates if necesary
