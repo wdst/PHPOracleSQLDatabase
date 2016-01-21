@@ -11,6 +11,7 @@
  * @author sergo.beruashvili
  * @author wdst
  */
+
 namespace wdst\PHPOracleSQLDatabase;
 
 class SQLDatabase {
