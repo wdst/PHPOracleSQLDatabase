@@ -18,7 +18,7 @@ class SQLDatabase {
 
     //Private constructor for Singleton
     private function __construct() {
-        
+
     }
 
     // OCI Database Instance
@@ -46,7 +46,7 @@ class SQLDatabase {
     }
 
     /*
-     * 
+     *
      * Takes $sql statement and $values containing key => value binding params
      * Returns Array (succes,data)
      *  success - boolean - true/false , if query executed
@@ -75,7 +75,7 @@ class SQLDatabase {
 
     /*
      * Takes sql statement and $values ,returns boolean , succes/failure of execute ( eg UPDATE , INSERT ... )
-     * 
+     *
      */
 
     public static function qout($sql, $values = Array()) {
@@ -93,6 +93,45 @@ class SQLDatabase {
         }
 
         return Array('success' => true, 'data' => '');
+    }
+
+    /*
+     * Call the procedure with params
+     *
+     * pr_key => 'value'
+     *
+     * exmaple: BEGIN icr.core.p_init_new_session(pr_login => 'login', pr_pwd => 'pass', pr_subsystem => 'WEB'); END;
+     */
+
+    public static function callProcedureParams($procedure, $values = Array()) {
+
+        $database = SQLDatabase::getInstance();
+
+        $sql = '';
+
+        $keys = array_keys($values);
+
+        if (sizeof($values) > 0) {
+            $sql = 'BEGIN ' . $procedure . '(' . implode(',', $keys) . '); END;';
+        } else {
+            $sql = 'BEGIN ' . $procedure . '; END;';
+        }
+
+        foreach ($values as $key => $value) {
+            $values[$key] = str_replace(":", "", $key) . " => " . "'$value'";
+        }
+
+        $sql = str_replace($keys, $values, $sql);
+
+        $statement = oci_parse($database, $sql);
+
+        if (!oci_execute($statement)) {
+            $errors = oci_error($statement);
+            return Array('success' => false, 'data' => 'Error : ' . $errors['code'] . ' => ' . $errors['message'], 'params' => $values,
+                'sql' => $sql);
+        }
+
+        return Array('success' => true, 'data' => '', 'params' => $values, 'sql' => $sql);
     }
 
     /*
